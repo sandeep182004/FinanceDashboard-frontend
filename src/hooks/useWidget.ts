@@ -7,7 +7,6 @@
 
 import { useCallback, useState } from 'react';
 import { useWidgetStore } from '@/store/widgetStore';
-import { Widget } from '@/store/types';
 
 export const useWidget = (widgetId: string) => {
   const widget = useWidgetStore((state) =>
