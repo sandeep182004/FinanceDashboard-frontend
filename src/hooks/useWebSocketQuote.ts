@@ -30,8 +30,31 @@ let globalSocket: Socket | null = null;
 
 function getSocket(): Socket {
   if (!globalSocket) {
-    const url = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4001';
-    globalSocket = io(url, {
+    const httpUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || '').trim();
+
+    // Derive ws/wss URL from http/https backend URL
+    const socketUrl = (() => {
+      if (httpUrl) {
+        try {
+          const u = new URL(httpUrl);
+          const wsProtocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
+          return `${wsProtocol}//${u.host}`;
+        } catch {
+          // Fallback simple replacement if URL parsing fails
+          if (httpUrl.startsWith('https://')) return httpUrl.replace('https://', 'wss://');
+          if (httpUrl.startsWith('http://')) return httpUrl.replace('http://', 'ws://');
+          return httpUrl; // assume already ws/wss
+        }
+      }
+      // If env missing, infer from current page origin
+      if (typeof window !== 'undefined') {
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        return `${wsProtocol}//${window.location.host}`;
+      }
+      return 'ws://localhost:4001';
+    })();
+
+    globalSocket = io(socketUrl, {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,

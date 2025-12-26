@@ -21,7 +21,25 @@ interface UseStockSocketOptions {
  */
 export const useStockSocket = (options: UseStockSocketOptions = {}) => {
   const {
-    url = 'http://localhost:4001',
+    url = (() => {
+      const httpUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || '').trim();
+      if (httpUrl) {
+        try {
+          const u = new URL(httpUrl);
+          const wsProtocol = u.protocol === 'https:' ? 'wss:' : 'ws:';
+          return `${wsProtocol}//${u.host}`;
+        } catch {
+          if (httpUrl.startsWith('https://')) return httpUrl.replace('https://', 'wss://');
+          if (httpUrl.startsWith('http://')) return httpUrl.replace('http://', 'ws://');
+          return httpUrl;
+        }
+      }
+      if (typeof window !== 'undefined') {
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        return `${wsProtocol}//${window.location.host}`;
+      }
+      return 'ws://localhost:4001';
+    })(),
     autoConnect = true
   } = options;
 
