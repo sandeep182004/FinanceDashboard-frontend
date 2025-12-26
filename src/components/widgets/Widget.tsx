@@ -34,7 +34,7 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({ widget }) => {
       'stock-table': 'table',
     };
 
-    return map[widget.type as keyof typeof map] || 'unknown';
+    return (map[widget.type as keyof typeof map] || 'unknown') as Widget['type'] | 'unknown';
   })();
 
   if (normalizedType === 'unknown') {
