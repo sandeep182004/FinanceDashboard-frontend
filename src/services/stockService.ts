@@ -3,7 +3,7 @@
  * Wrapper around API client for stock-related endpoints
  */
 
-import apiClient, { requestWithRetry } from './api';
+import { requestWithRetry } from './api';
 
 export interface StockQuote {
   symbol: string;
